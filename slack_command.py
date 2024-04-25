@@ -54,6 +54,10 @@ def message_hello(message, say):
 def message_hello(message, say):
     slack_say('gcccompany', message, say)
 
+@app.message("!무신사")
+def message_hello(message, say):
+    slack_say('musinsa', message, say)
+
 # Start your app
 if __name__ == "__main__":
     SocketModeHandler(app, APP_TOKEN).start()
