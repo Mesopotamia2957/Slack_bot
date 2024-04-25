@@ -46,7 +46,13 @@ def message_hello(message, say):
 def message_hello(message, say):
     slack_say('hl_klemove', message, say)
 
+@app.message("!스노우")
+def message_hello(message, say):
+    slack_say('snow', message, say)
 
+@app.message("!여기어때")
+def message_hello(message, say):
+    slack_say('gcccompany', message, say)
 
 # Start your app
 if __name__ == "__main__":
