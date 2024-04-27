@@ -66,6 +66,10 @@ def message_hello(message, say):
 def message_hello(message, say):
     slack_say('nexon', message, say)
 
+@app.message("!두들린")
+def message_hello(message, say):
+    slack_say('doodlin', message, say)
+
 # Start your app
 if __name__ == "__main__":
     SocketModeHandler(app, APP_TOKEN).start()
