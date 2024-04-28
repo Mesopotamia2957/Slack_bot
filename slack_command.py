@@ -70,6 +70,14 @@ def message_hello(message, say):
 def message_hello(message, say):
     slack_say('doodlin', message, say)
 
+@app.message("!SSG")
+def message_hello(message, say):
+    slack_say('ssg', message, say)
+
+# @app.message("!신세계아이엔씨")
+# def message_hello(message, say):
+#     slack_say('shinsegaeinc', message, say)
+
 # Start your app
 if __name__ == "__main__":
     SocketModeHandler(app, APP_TOKEN).start()
