@@ -30,6 +30,20 @@ def slack_say(endpoint, message, say):
         say("Error: 크롤링 실패, 관리자에게 문의하세요")
 
 
+@app.message("!목록")
+def message_hello(message, say):
+    data = ''
+    url = BASE_URL + 'company_list'
+    response = requests.get(url)
+    if response.status_code == 200:
+        results = response.json()
+        for company in results:
+            data += ("\n------------------------------\n🏢 {0} : [{1}]".format(company, results[company]))
+        say(data)
+    else:
+        print("Error:", response.status_code)
+        say("Error: 크롤링 실패, 관리자에게 문의하세요")
+
 @app.message("!네이버")
 def message_hello(message, say):
     slack_say('naver', message, say)
