@@ -92,6 +92,10 @@ def message_hello(message, say):
 def message_hello(message, say):
     slack_say('shinsegaeinc', message, say)
 
+@app.message("!야놀자")
+def message_hello(message, say):
+    slack_say('yanolja', message, say)
+
 # Start your app
 if __name__ == "__main__":
     SocketModeHandler(app, APP_TOKEN).start()
