@@ -32,5 +32,8 @@ API_KEY = os.getenv('API_KEY', '').strip()
 
 REQUEST_TIMEOUT = float(os.getenv('REQUEST_TIMEOUT', '10'))
 
+# 옵시디언 인박스 작성기(inbox-api) 주소. 비워두면 `!메모` 가 안내만 한다.
+INBOX_URL = os.getenv('INBOX_URL', '').strip()
+
 # 한 메시지에 넣을 공고 수. 슬랙 메시지 길이 제한(약 4000자)을 넘지 않게 한다.
 MAX_ITEMS = int(os.getenv('MAX_ITEMS', '25'))

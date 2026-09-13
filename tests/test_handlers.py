@@ -152,3 +152,30 @@ class RegistrationTests(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class MemoCommandTests(unittest.TestCase):
+    def test_memo_saves_to_inbox(self):
+        payload = {'ok': True, 'file': '2026-09-13-2030.md', 'chars': 9}
+        with patch.object(api, 'save_inbox', return_value=payload) as mock:
+            reply = call('!메모 치과 예약 잡기')
+        mock.assert_called_once_with('치과 예약 잡기')
+        self.assertIn('2026-09-13-2030.md', reply)
+
+    def test_memo_keeps_line_breaks(self):
+        payload = {'ok': True, 'file': 'x.md', 'chars': 5}
+        with patch.object(api, 'save_inbox', return_value=payload) as mock:
+            call('!메모 첫 줄\n둘째 줄')
+        self.assertEqual(mock.call_args[0][0], '첫 줄\n둘째 줄')
+
+    def test_memo_without_text_explains_usage(self):
+        reply = call('!메모')
+        self.assertIn('내용을 적어', reply)
+
+    def test_memo_api_error_is_reported(self):
+        with patch.object(api, 'save_inbox', side_effect=api.ApiError('메모 서버에 연결할 수 없습니다.')):
+            reply = call('!메모 뭔가')
+        self.assertIn('연결할 수 없습니다', reply)
+
+    def test_help_mentions_memo(self):
+        self.assertIn('!메모', formatting.HELP)

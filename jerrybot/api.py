@@ -87,6 +87,20 @@ def remove_keywords(user_id, keywords):
     return _request('DELETE', f'subscribers/{user_id}/keywords/', json={'keywords': keywords})
 
 
+def save_inbox(text):
+    """옵시디언 인박스에 메모 한 건을 남긴다. inbox-api 가 파일을 만들고 git 은 서버가 알아서 올린다."""
+    if not config.INBOX_URL:
+        raise ApiError('메모 저장이 설정되지 않았습니다. (INBOX_URL 없음)')
+    try:
+        response = requests.post(config.INBOX_URL, json={'text': text, 'source': 'slack'},
+                                 timeout=config.REQUEST_TIMEOUT)
+    except requests.RequestException:
+        raise ApiError('메모 서버에 연결할 수 없습니다. 잠시 후 다시 시도해 주세요.')
+    if not response.ok:
+        raise ApiError(f'메모 저장에 실패했습니다. (코드 {response.status_code})')
+    return response.json()
+
+
 def my_matches(user_id, limit=None):
     params = {'limit': limit} if limit else {}
     return _request('GET', f'subscribers/{user_id}/matches/', params=params)

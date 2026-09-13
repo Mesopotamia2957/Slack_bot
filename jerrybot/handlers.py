@@ -134,7 +134,18 @@ def cmd_company(command, **_):
     )
 
 
+def cmd_memo(args, **_):
+    """`!메모 내용` — 옵시디언 인박스에 남긴다. 줄바꿈도 그대로 들어간다."""
+    text = (args or '').strip()
+    if not text:
+        return '남길 내용을 적어 주세요. 예: `!메모 다음 주 월요일 치과 예약`'
+    payload = api.save_inbox(text)
+    return (f'📥 인박스에 저장했어요 · `{payload["file"]}` ({payload["chars"]}자)\n'
+            '_새벽 배치가 Daily 노트로 정리합니다._')
+
+
 COMMANDS = {
+    '메모': cmd_memo, '기록': cmd_memo, '인박스': cmd_memo, 'memo': cmd_memo,
     '도움말': cmd_help, 'help': cmd_help, '사용법': cmd_help,
     '목록': cmd_companies, '기업': cmd_companies, '기업목록': cmd_companies,
     '검색': cmd_search,
