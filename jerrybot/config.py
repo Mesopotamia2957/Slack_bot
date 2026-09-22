@@ -1,3 +1,9 @@
+"""설정값을 .env 에서 읽어 오는 곳. 여기 없는 환경변수는 코드 어디에서도 안 쓴다.
+
+_required 로 읽는 값(BOT_TOKEN, APP_TOKEN, URI)이 하나라도 비면 봇이 뜨면서 바로 죽는다.
+반쯤 동작하다 사용자 앞에서 실패하는 것보다, 시작할 때 확실히 죽는 편이 낫기 때문이다.
+"""
+
 import os
 from pathlib import Path
 
@@ -15,6 +21,7 @@ class ConfigError(RuntimeError):
 
 
 def _required(name):
+    """없으면 즉시 죽는 설정값. 봇이 반쯤 동작하는 상태를 만들지 않기 위해서다."""
     value = os.getenv(name, '').strip()
     if not value:
         raise ConfigError(f'.env 에 {name} 이(가) 없습니다. .env.example 을 참고하세요.')

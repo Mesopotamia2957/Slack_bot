@@ -20,6 +20,10 @@ HELP_WORDS = {'도움말', '도움', '사용법', 'help', '?', '헬프', '명령
 
 
 def _args(raw):
+    """명령 뒤에 붙은 인자를 공백·쉼표로 잘라 리스트로.
+
+    '!키워드추가 백엔드, 서버' 처럼 사람이 쉼표를 섞어 쓰는 경우를 둘 다 받아 준다.
+    """
     return [token for token in raw.replace(',', ' ').split() if token]
 
 
@@ -34,14 +38,20 @@ def _is_dm(channel_id):
 # ---------------------------------------------------------------------------
 
 def cmd_help(**_):
+    """`!도움말` — 전체 사용법. 처음 쓰는 사람이 볼 유일한 안내라 formatting.HELP 에 길게 적어 뒀다."""
     return formatting.HELP
 
 
 def cmd_companies(**_):
+    """`!목록` — 크롤링 중인 기업과 각 기업의 진행 중 공고 수."""
     return formatting.companies(api.list_companies())
 
 
 def cmd_search(args, **_):
+    """`!검색 백엔드 django` — 모든 기업에서 키워드로 찾는다.
+
+    등록 키워드(알림용)와는 무관한 일회성 검색이다.
+    """
     keywords = _args(args)
     if not keywords:
         return '검색어를 입력해 주세요. 예: `!검색 백엔드 django`'
@@ -54,10 +64,16 @@ def cmd_search(args, **_):
 
 
 def cmd_keywords(user_id, **_):
+    """`!키워드` — 지금 등록된 내 키워드."""
     return formatting.keyword_list(api.get_keywords(user_id)['keywords'])
 
 
 def cmd_keyword_add(args, user_id, channel_id, **_):
+    """`!키워드추가 백엔드 서버` — 키워드를 등록한다. 여러 개를 한 번에 받는다.
+
+    DM 에서 부르면 그 대화방을 알림 채널로 같이 저장한다. 공개 채널이면 저장하지 않는다 —
+    그래야 알림이 채널에 공개되지 않고 DM 으로 간다.
+    """
     keywords = _args(args)
     if not keywords:
         return '추가할 키워드를 입력해 주세요. 예: `!키워드추가 백엔드 django`'
@@ -75,6 +91,7 @@ def cmd_keyword_add(args, user_id, channel_id, **_):
 
 
 def cmd_keyword_remove(args, user_id, **_):
+    """`!키워드삭제 백엔드` — 키워드를 지운다. 없는 키워드를 지워도 오류로 보지 않는다."""
     keywords = _args(args)
     if not keywords:
         return '삭제할 키워드를 입력해 주세요. 예: `!키워드삭제 백엔드`'
@@ -87,6 +104,10 @@ def cmd_keyword_remove(args, user_id, **_):
 
 
 def cmd_my_postings(user_id, **_):
+    """`!내공고` — 내 키워드에 맞는 공고를 지금 전부 본다.
+
+    알림은 '새 공고'만 오지만 이건 이미 받은 것까지 다시 훑어보는 용도다.
+    """
     payload = api.my_matches(user_id)
     if not payload['keywords']:
         return formatting.keyword_list([])
@@ -103,6 +124,10 @@ OFF_WORDS = {'끄기', 'off', '끔', '중지', '해제'}
 
 
 def cmd_notify(args, user_id, channel_id, **_):
+    """`!알림 켜기` / `!알림 끄기` — DM 알림을 켜고 끈다. 인자가 없으면 현재 상태만 알려준다.
+
+    끄더라도 키워드는 남는다. 잠시 쉬었다가 다시 켤 때 다시 등록하지 않아도 되게.
+    """
     tokens = _args(args)
     if not tokens or tokens[0].lower() not in ON_WORDS | OFF_WORDS:
         current = api.get_subscriber(user_id)['notify_enabled']
@@ -191,8 +216,15 @@ def nudge(text, channel_id):
 
 
 def register(app):
+    """슬랙 앱에 이벤트 핸들러를 붙인다. 봇이 뜰 때 한 번 불린다.
+
+    '!' 로 시작하는 메시지와 @멘션 두 갈래만 받는다. 그 외 메시지는 무시한다 —
+    봇이 들어와 있는 채널의 모든 대화에 반응하면 시끄럽기 때문이다.
+    """
+
     @app.message(re.compile(r'^\s*!'))
     def handle_command(message, say):
+        """'!' 로 시작하는 메시지를 받아 dispatch 로 넘기고 결과를 그대로 답장한다."""
         reply = dispatch(message.get('text', ''), message.get('user', ''), message.get('channel', ''))
         if reply:
             say(reply)
