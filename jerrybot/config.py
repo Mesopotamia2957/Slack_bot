@@ -42,5 +42,10 @@ REQUEST_TIMEOUT = float(os.getenv('REQUEST_TIMEOUT', '10'))
 # 옵시디언 인박스 작성기(inbox-api) 주소. 비워두면 `!메모` 가 안내만 한다.
 INBOX_URL = os.getenv('INBOX_URL', '').strip()
 
+# `!메모` 를 쓸 수 있는 슬랙 사용자 ID(쉼표로 여러 명). 인박스는 볼트 주인 한 사람의 것이라,
+# 워크스페이스의 다른 구성원이 남의 볼트에 글을 넣지 못하게 한다. 비워두면 아무도 못 쓴다
+# (설정을 빠뜨렸을 때 열리는 쪽이 아니라 닫히는 쪽으로).
+INBOX_ALLOWED_USERS = frozenset(u.strip() for u in os.getenv('INBOX_ALLOWED_USERS', '').split(',') if u.strip())
+
 # 한 메시지에 넣을 공고 수. 슬랙 메시지 길이 제한(약 4000자)을 넘지 않게 한다.
 MAX_ITEMS = int(os.getenv('MAX_ITEMS', '25'))

@@ -9,7 +9,7 @@ sites.py 만 고치면 된다.
 import logging
 import re
 
-from . import api, formatting
+from . import api, config, formatting
 
 logger = logging.getLogger(__name__)
 
@@ -159,8 +159,14 @@ def cmd_company(command, **_):
     )
 
 
-def cmd_memo(args, **_):
-    """`!메모 내용` — 옵시디언 인박스에 남긴다. 줄바꿈도 그대로 들어간다."""
+def cmd_memo(args, user_id='', **_):
+    """`!메모 내용` — 옵시디언 인박스에 남긴다. 줄바꿈도 그대로 들어간다.
+
+    인박스는 볼트 주인의 것이라 config.INBOX_ALLOWED_USERS 에 있는 사람만 쓸 수 있다.
+    내용을 보기 전에 먼저 거른다.
+    """
+    if user_id not in config.INBOX_ALLOWED_USERS:
+        return '`!메모` 는 볼트 주인만 쓸 수 있는 명령이에요.'
     text = (args or '').strip()
     if not text:
         return '남길 내용을 적어 주세요. 예: `!메모 다음 주 월요일 치과 예약`'

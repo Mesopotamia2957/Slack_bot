@@ -6,7 +6,7 @@
 import unittest
 from unittest.mock import patch
 
-from jerrybot import api, formatting, handlers
+from jerrybot import api, config, formatting, handlers
 
 
 def call(text, user_id='U1', channel_id='D1'):
@@ -155,6 +155,32 @@ if __name__ == '__main__':
 
 
 class MemoCommandTests(unittest.TestCase):
+    def setUp(self):
+        # 테스트의 기본 사용자 U1 을 볼트 주인으로 둔다
+        patcher = patch.object(config, 'INBOX_ALLOWED_USERS', frozenset({'U1'}))
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+    def test_memo_from_other_member_is_refused(self):
+        """워크스페이스의 다른 구성원은 남의 볼트 인박스에 글을 넣을 수 없다."""
+        with patch.object(api, 'save_inbox') as mock:
+            reply = handlers.dispatch('!메모 <img src=x onerror=alert(1)>', 'U2', 'D2')
+        mock.assert_not_called()
+        self.assertIn('볼트 주인만', reply)
+
+    def test_memo_is_closed_when_owner_is_not_configured(self):
+        """설정을 빠뜨리면 모두에게 닫힌다(열리는 쪽으로 실패하지 않는다)."""
+        with patch.object(config, 'INBOX_ALLOWED_USERS', frozenset()), patch.object(api, 'save_inbox') as mock:
+            reply = call('!메모 뭔가')
+        mock.assert_not_called()
+        self.assertIn('볼트 주인만', reply)
+
+    def test_memo_aliases_are_also_restricted(self):
+        with patch.object(api, 'save_inbox') as mock:
+            for text in ['!기록 x', '!인박스 x', '!memo x']:
+                handlers.dispatch(text, 'U2', 'D2')
+        mock.assert_not_called()
+
     def test_memo_saves_to_inbox(self):
         payload = {'ok': True, 'file': '2026-09-13-2030.md', 'chars': 9}
         with patch.object(api, 'save_inbox', return_value=payload) as mock:
